@@ -2,7 +2,7 @@ from nltk import TweetTokenizer
 import spacy
 from sklearn.base import TransformerMixin
 
-from ml_pipeline.utils import hate_lexicon
+from ml_pipeline.utils import hate_lexicon, lexobj2
 
 
 class Preprocessor(TransformerMixin):
@@ -48,7 +48,6 @@ class Preprocessor(TransformerMixin):
 
         return apply_lexicon
 
-
 def tokenize_with(kwargs):
     tokenizer = TweetTokenizer(**kwargs)
 
@@ -67,9 +66,16 @@ def lemmatize_with_spacy(data):
 
 # -------------- standard preprocessor --------------------------------
 
-def std_prep():
-    return Preprocessor(tokenize=True, normalize_tweet=True, lowercase=True, lemmatize=False)
+# possible to change these settings like below!
 
+def std_prep():
+    return Preprocessor(tokenize=True, normalize_tweet=True, lowercase=True, lemmatize=False) 
+
+def std_prep_lem():
+    return Preprocessor(tokenize=False, normalize_tweet=True, lowercase=True, lemmatize=True)
 
 def lex_prep():
     return Preprocessor(tokenize=True, normalize_tweet=True, lowercase=True, lemmatize=False, lexicon=hate_lexicon())
+
+def lex_prep2():
+    return Preprocessor(tokenize=True, normalize_tweet=False, lowercase=False, lemmatize=False, lexicon=lexobj2())

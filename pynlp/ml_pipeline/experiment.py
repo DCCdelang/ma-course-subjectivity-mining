@@ -3,7 +3,7 @@ import sys
 
 from tasks import vua_format as vf
 from ml_pipeline import utils, cnn, preprocessing, pipeline_with_lexicon
-from ml_pipeline import pipelines
+from ml_pipeline import pipelines, representation
 from ml_pipeline.cnn import CNN, evaluate
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-def run(task_name, data_dir, pipeline_name, print_predictions):
+def run(task_name, data_dir, pipeline_name, print_predictions, GridSearch, ImpFea, conf_matrix):
     logger.info('>> Running {} experiment'.format(task_name))
     tsk = task(task_name)
     logger.info('>> Loading data...')
@@ -37,14 +37,35 @@ def run(task_name, data_dir, pipeline_name, print_predictions):
         logger.info("   -- Found {} tokens in lexicon".format(pipe.tokens_from_lexicon))
 
     logger.info('>> testing...')
-    sys_y = pipe.predict(test_X)
+
+    if GridSearch == True:
+        if "svm" in pipeline_name:
+            params = pipelines.svm_clf_grid_parameters()
+            sys_y = utils.grid_search(pipe, params , train_X, train_y, test_X)
+        else:
+            print("Gridsearch not available, will perform normal predict.")
+            sys_y = pipe.predict(test_X)
+    else:
+        sys_y = pipe.predict(test_X)
 
     logger.info('>> evaluation...')
     logger.info(utils.eval(test_y, sys_y))
+    if ImpFea == True:
+        if "svm" not in pipeline_name:
+            if "cnn" not in pipeline_name:
+                if "lex" not in pipeline_name:
+                    utils.important_features_per_class(pipe.named_steps.frm, pipe.named_steps.clf)
+        if "svm" in pipeline_name:
+            utils.important_features_per_class_SVM(pipe.named_steps.frm.fit(train_X), pipe.named_steps.clf)
+        
+
 
     if print_predictions:
         logger.info('>> predictions')
-        utils.print_all_predictions(test_X_ref, test_y, sys_y, logger)
+        logger.info(utils.print_all_predictions(test_X_ref, test_y, sys_y, logger))
+    if conf_matrix:
+        logger.info(">> plotting confusion matrix")
+        logger.info(utils.print_error_analysis(pipe,test_X_ref,test_y,sys_y,logger))
 
 
 def task(name):
@@ -78,9 +99,14 @@ def pipeline(name):
         return pipelines.svm_libsvc_embed()
     elif name == 'svm_sigmoid_embed':
         return pipelines.svm_sigmoid_embed()
+    elif name == 'svm_libsvc_tfidf_char':
+        return pipelines.svm_libsvc_tfidf_char()
+    elif name == 'naive_bayes_counts_lex':
+        return pipelines.naive_bayes_counts_lex()
+    elif name == 'naive_bayes_counts_bigram':
+        return pipelines.naive_bayes_counts_bigram()
+    elif name == 'svm_libsvc_tfidf_lem':
+        return pipelines.svm_libsvc_tfidf_lem()
     else:
         raise ValueError("pipeline name is unknown. You can add a custom pipeline in 'pipelines'")
-
-
-
 

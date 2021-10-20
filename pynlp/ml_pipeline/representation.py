@@ -17,13 +17,13 @@ class Text2Embedding(TransformerMixin):
         print('transforming data using customized transformer')
         model = None
         if self.embed_source == 'glove':
-            path = 'data/glove.twitter.27B.100d.txt'
-            w2vfile = 'data/glove.twitter.27B.100d.vec'
+            path = 'data/glove.twitter.27B/glove.twitter.27B.100d.txt'
+            w2vfile = 'data/glove.twitter.27B/glove.twitter.27B.100d.vec'
             if not Path(w2vfile).is_file():
                 glove2word2vec(path, w2vfile)
             model = KeyedVectors.load_word2vec_format(w2vfile, binary=False)
         else:
-            path = 'data/wiki-news-300d-1M.vec'
+            path = 'data/wiki-news-300d-1M/wiki-news-300d-1M.vec'
             model = KeyedVectors.load_word2vec_format(path, binary=False)
         n_d = len(model['the'])
         data = []

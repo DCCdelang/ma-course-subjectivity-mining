@@ -1,9 +1,13 @@
 import pandas as pd
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
+import matplotlib 
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics.classification import classification_report
 from keras.models import load_model
+from sklearn.metrics import plot_confusion_matrix
+matplotlib.rcParams.update({'font.size': 16})
 
 
 # ----------- data extraction and splitting ----------------------
@@ -109,6 +113,34 @@ def print_all_predictions(test_X, test_y, sys_y, logger):
         to_print = "{}\t{}\t{}".format(sys_y[i], test_y.values[i], test_X[i])
         logger.info(to_print)
 
+def print_error_analysis(clf,test_X, test_y, sys_y, logger):
+    plot_confusion_matrix(clf,test_X,test_y,normalize="true",cmap="Blues")
+    plt.tight_layout()
+    plt.show()
+
+def important_features_per_class(vectorizer,classifier,n=80):
+    class_labels = classifier.classes_
+    feature_names = vectorizer.get_feature_names()
+    for i in range(0, len(class_labels)):
+        topn_class = sorted(zip(classifier.feature_count_[0], feature_names),reverse=True)[:n]
+        print('\nImportant features in Class \'{}\''.format(class_labels[i]))
+        for coef, feat in topn_class:
+            print(class_labels[i], coef, feat)
+
+def important_features_per_class_SVM(vectorizer,classifier,n=80):
+    names = vectorizer.get_feature_names()
+    [imp] = classifier.coef_
+    topn_class = sorted(zip(imp,names),reverse=True)
+    for coef, feat in topn_class:
+        print(coef, feat)
+
+    # imp,names = zip(*sorted(zip(imp,names)))
+    # imp = imp[-15:]
+    # names = names[-15:]
+    # plt.barh(range(len(names)), imp, align='center')
+    # plt.yticks(range(len(names)), names)
+    # plt.show()
+
 
 # -------------- polarity lexicons -------------------
 
@@ -124,5 +156,20 @@ def hate_lexicon():
         label = df1.loc[i]['Label']
         Dlex[entry] = {}
         Dlex[entry]["label"] = label
+        Dlex[entry]["pos"] = pos
+    return Dlex
+
+def lexobj2():
+    Dlex={}
+    lex_name="resources/subj_clues_vua_format.csv"
+    df1=pd.read_csv(lex_name,sep=";")
+    #print("\ndataset:{}\tnr of rows:{}\tnr of columns:{}".format(lex_name, df1.shape[0], df1.shape[1]))
+
+    for i, row in df1.iterrows():
+        entry = df1.loc[i]['Entry']
+        pos = df1.loc[i]['Pos']
+        label = df1.loc[i]['Label']
+        Dlex[entry]={}
+        Dlex[entry]["label"]=label
         Dlex[entry]["pos"] = pos
     return Dlex

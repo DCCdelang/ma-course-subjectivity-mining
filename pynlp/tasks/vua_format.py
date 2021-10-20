@@ -5,7 +5,7 @@ class VuaFormat:
     """VUA-format data"""
 
     def __init__(self):
-        self.training_file = 'trainData.csv'
+        self.training_file = 'gibert_vua_format/trainData.csv'
         self.task = None
         self.name = "VUA_format"
         self.train_data = None
@@ -14,7 +14,7 @@ class VuaFormat:
     def __str__(self):
         return self.name + ", " + self.task
 
-    def load(self, data_dir, test_file='testData.csv'):
+    def load(self, data_dir, test_file='OLID-A_vua_format/OLID-A/testData_converted.csv'):
         self.train_data = pd.read_csv(data_dir + self.training_file, delimiter="\t")
         self.test_data = pd.read_csv(data_dir + test_file, delimiter="\t")
 

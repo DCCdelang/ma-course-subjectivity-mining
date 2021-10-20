@@ -39,23 +39,28 @@ def naive_bayes_tfidf():
     return pipeline(preprocessing.std_prep(), representation.tfidf_vectorizer(), MultinomialNB())
 
 
-def svm_libsvc_counts():
-    return pipeline(preprocessing.std_prep(), representation.count_vectorizer(), svm.LinearSVC(max_iter=10000,
-                                                                                               dual=False, C=0.1))
+def naive_bayes_counts_lex():
+    return pipeline(preprocessing.lex_prep(), representation.count_vectorizer({'min_df': 1}), MultinomialNB())
 
+
+def naive_bayes_counts_bigram():
+    return pipeline(preprocessing.std_prep(), representation.count_vectorizer({'min_df': 1,'ngram_range': (2,2)}), MultinomialNB())
+
+def svm_libsvc_counts():
+    return pipeline(preprocessing.std_prep(), representation.count_vectorizer(), svm.LinearSVC(max_iter=10000, dual=False, C=0.1))
 
 def svm_libsvc_tfidf():
-    return pipeline(preprocessing.std_prep(), representation.tfidf_vectorizer(), svm.LinearSVC(max_iter=10000,
-                                                                                               dual=False, C=0.1))
+    return pipeline(preprocessing.std_prep(), representation.tfidf_vectorizer(), svm.LinearSVC(max_iter=10000, dual=False, C=0.1))
 
+def svm_libsvc_tfidf_char():
+    return pipeline(preprocessing.std_prep(), representation.tfidf_vectorizer({"analyzer":"char"}), svm.LinearSVC(max_iter=10000, dual=False, C=0.1))
+
+def svm_libsvc_tfidf_lem():
+    return pipeline(preprocessing.std_prep_lem(), representation.tfidf_vectorizer({"analyzer":"char"}), svm.LinearSVC(max_iter=10000, dual=False, C=0.1))
 
 def svm_libsvc_embed():
-    return pipeline(preprocessing.std_prep(), representation.text2embeddings('wiki-news'), svm.LinearSVC(max_iter=10000,
-                                                                                              dual=False, C=0.1))
+    return pipeline(preprocessing.std_prep(), representation.text2embeddings('wiki-news'), svm.LinearSVC(max_iter=10000, dual=False, C=0.1))
 
 
 def svm_sigmoid_embed():
-    return pipeline(preprocessing.std_prep(), representation.text2embeddings('glove'), svm.SVC(kernel='sigmoid',
-                                                                                        gamma='scale'))
-
-
+    return pipeline(preprocessing.std_prep(), representation.text2embeddings('glove'), svm.SVC(kernel='sigmoid',gamma='scale'))
